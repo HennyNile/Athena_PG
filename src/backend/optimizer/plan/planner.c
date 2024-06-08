@@ -67,6 +67,7 @@
 #include "utils/rel.h"
 #include "utils/selfuncs.h"
 #include "utils/syscache.h"
+#include "lero/lero_extension.h"
 
 /* GUC parameters */
 double		cursor_tuple_fraction = DEFAULT_CURSOR_TUPLE_FRACTION;
@@ -277,6 +278,8 @@ planner(Query *parse, const char *query_string, int cursorOptions,
 
 	if (planner_hook)
 		result = (*planner_hook) (parse, query_string, cursorOptions, boundParams);
+	else if (enable_lero)
+		result = lero_pgsysml_hook_planner(parse, query_string, cursorOptions, boundParams);
 	else
 		result = standard_planner(parse, query_string, cursorOptions, boundParams);
 	return result;

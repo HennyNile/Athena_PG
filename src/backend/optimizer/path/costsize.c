@@ -98,6 +98,7 @@
 #include "utils/selfuncs.h"
 #include "utils/spccache.h"
 #include "utils/tuplesort.h"
+#include "lero/lero_extension.h"
 
 
 #define LOG2(x)  (log(x) / 0.693147180559945)
@@ -5090,6 +5091,10 @@ set_joinrel_size_estimates(PlannerInfo *root, RelOptInfo *rel,
 										   inner_rel->rows,
 										   sjinfo,
 										   restrictlist);
+	if (enable_lero) {
+        lero_pgsysml_set_joinrel_size_estimates(root, rel, outer_rel,
+                                               inner_rel, sjinfo, restrictlist);
+    }
 }
 
 /*

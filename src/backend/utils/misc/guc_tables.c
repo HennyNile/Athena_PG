@@ -83,6 +83,7 @@
 #include "utils/ps_status.h"
 #include "utils/inval.h"
 #include "utils/xml.h"
+#include "lero/lero_extension.h"
 
 /* This value is normally passed in from the Makefile */
 #ifndef PG_KRB_SRVTAB
@@ -1997,6 +1998,16 @@ struct config_bool ConfigureNamesBool[] =
 		NULL, NULL, NULL
 	},
 
+	{
+		{"enable_lero", PGC_USERSET, UNGROUPED,
+			gettext_noop("Enable Lero."),
+			NULL
+		},
+		&enable_lero,
+		false,
+		NULL, NULL, NULL
+    },
+
 	/* End-of-list marker */
 	{
 		{NULL, 0, 0, NULL, NULL}, NULL, false, NULL, NULL, NULL
@@ -3505,6 +3516,16 @@ struct config_int ConfigureNamesInt[] =
 		NULL, NULL, NULL
 	},
 
+	{
+		{"lero_subquery_table_num", PGC_USERSET, UNGROUPED,
+			gettext_noop("Cardinality of subqueries whoes number of tables equals to this will be changed."),
+			NULL
+		},
+		&lero_subquery_table_num,
+		SCRAM_SHA_256_DEFAULT_ITERATIONS, 2, INT_MAX,
+		NULL, NULL, NULL
+	},
+
 	/* End-of-list marker */
 	{
 		{NULL, 0, 0, NULL, NULL}, NULL, 0, 0, 0, NULL, NULL, NULL
@@ -3783,6 +3804,16 @@ struct config_real ConfigureNamesReal[] =
 		},
 		&log_xact_sample_rate,
 		0.0, 0.0, 1.0,
+		NULL, NULL, NULL
+	},
+
+	{
+		{"lero_swing_factor", PGC_USERSET, UNGROUPED,
+			gettext_noop("Sets the fraction of transactions from which to log all statements."),
+			NULL
+		},
+		&lero_swing_factor,
+		0.0, 0.0, DBL_MAX,
 		NULL, NULL, NULL
 	},
 
