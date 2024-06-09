@@ -152,6 +152,20 @@ add_paths_to_joinrel(PlannerInfo *root,
 	extra.sjinfo = sjinfo;
 	extra.param_source_rels = NULL;
 
+	List *tmp_list;
+	bool rootrel_candidate_path = false;
+	if (enable_join_order_plans)
+	{
+		int root_relids = (int) root->all_baserels->words[0];
+		int join_relids = (int) joinrelids->words[0];
+		save_join_order_plan_finished = false;
+		if(root_relids == join_relids){
+			rootrel_candidate_path = true;
+			tmp_list = joinrel->pathlist;
+			joinrel->pathlist = NIL;
+		}
+	}
+
 	/*
 	 * See if the inner relation is provably unique for this outer rel.
 	 *
@@ -357,6 +371,25 @@ add_paths_to_joinrel(PlannerInfo *root,
 		consider_join_pushdown)
 		set_join_pathlist_hook(root, joinrel, outerrel, innerrel,
 							   jointype, &extra);
+
+	if(enable_join_order_plans && rootrel_candidate_path)
+	{	
+		if (tmp_list != NIL) {
+			const ListCell *cell;
+			foreach(cell, joinrel->pathlist)
+			{
+				tmp_list = lappend(tmp_list, lfirst(cell));
+			}
+			list_free(joinrel->pathlist);
+			joinrel->pathlist = tmp_list;
+		}
+	}
+	else {
+		if (enable_join_order_plans)
+		{
+			list_truncate(joinrel->pathlist, 1);
+		}
+	}
 }
 
 /*

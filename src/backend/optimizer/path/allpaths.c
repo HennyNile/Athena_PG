@@ -3421,6 +3421,9 @@ standard_join_search(PlannerInfo *root, int levels_needed, List *initial_rels)
 	int			lev;
 	RelOptInfo *rel;
 
+	if (enable_join_order_plans)
+		save_join_order_plan_finished = false;
+
 	/*
 	 * This function cannot be invoked recursively within any one planning
 	 * problem, so join_rel_level[] can't be in use already.
@@ -3497,6 +3500,9 @@ standard_join_search(PlannerInfo *root, int levels_needed, List *initial_rels)
 	rel = (RelOptInfo *) linitial(root->join_rel_level[levels_needed]);
 
 	root->join_rel_level = NULL;
+
+	if (enable_join_order_plans)
+		save_join_order_plan_finished = true;
 
 	return rel;
 }

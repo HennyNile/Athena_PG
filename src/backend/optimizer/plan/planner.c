@@ -68,6 +68,7 @@
 #include "utils/selfuncs.h"
 #include "utils/syscache.h"
 #include "lero/lero_extension.h"
+#include "optimizer/jop_extension.h"
 
 /* GUC parameters */
 double		cursor_tuple_fraction = DEFAULT_CURSOR_TUPLE_FRACTION;
@@ -418,6 +419,11 @@ standard_planner(Query *parse, const char *query_string, int cursorOptions,
 
 	/* Select best Path and turn it into a Plan */
 	final_rel = fetch_upper_rel(root, UPPERREL_FINAL, NULL);
+	if (enable_join_order_plans)
+	{
+		save_join_order_plans(root->glob, final_rel->pathlist);
+	}
+
 	best_path = get_cheapest_fractional_path(final_rel, tuple_fraction);
 
 	top_plan = create_plan(root, best_path);

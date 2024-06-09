@@ -2008,6 +2008,16 @@ struct config_bool ConfigureNamesBool[] =
 		NULL, NULL, NULL
     },
 
+	{
+		{"enable_join_order_plans", PGC_USERSET, UNGROUPED,
+			gettext_noop("Enable join order plans."),
+			NULL
+		},
+		&enable_join_order_plans,
+		false,
+		NULL, NULL, NULL
+	},
+
 	/* End-of-list marker */
 	{
 		{NULL, 0, 0, NULL, NULL}, NULL, false, NULL, NULL, NULL

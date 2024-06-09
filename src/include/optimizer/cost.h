@@ -71,6 +71,8 @@ extern PGDLLIMPORT bool enable_partition_pruning;
 extern PGDLLIMPORT bool enable_presorted_aggregate;
 extern PGDLLIMPORT bool enable_async_append;
 extern PGDLLIMPORT int constraint_exclusion;
+extern PGDLLIMPORT bool enable_join_order_plans;
+extern PGDLLIMPORT bool save_join_order_plan_finished;
 
 extern double index_pages_fetched(double tuples_fetched, BlockNumber pages,
 								  double index_pages, PlannerInfo *root);

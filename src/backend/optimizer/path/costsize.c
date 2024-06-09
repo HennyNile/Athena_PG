@@ -155,6 +155,9 @@ bool		enable_partition_pruning = true;
 bool		enable_presorted_aggregate = true;
 bool		enable_async_append = true;
 
+bool		enable_join_order_plans = false;
+bool 		save_join_order_plan_finished = false;
+
 typedef struct
 {
 	PlannerInfo *root;
