@@ -158,7 +158,6 @@ add_paths_to_joinrel(PlannerInfo *root,
 	{
 		int root_relids = (int) root->all_baserels->words[0];
 		int join_relids = (int) joinrelids->words[0];
-		save_join_order_plan_finished = false;
 		if(root_relids == join_relids){
 			rootrel_candidate_path = true;
 			tmp_list = joinrel->pathlist;
@@ -382,12 +381,6 @@ add_paths_to_joinrel(PlannerInfo *root,
 			}
 			list_free(joinrel->pathlist);
 			joinrel->pathlist = tmp_list;
-		}
-	}
-	else {
-		if (enable_join_order_plans)
-		{
-			list_truncate(joinrel->pathlist, 1);
 		}
 	}
 }

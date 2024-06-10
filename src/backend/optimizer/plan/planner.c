@@ -421,7 +421,7 @@ standard_planner(Query *parse, const char *query_string, int cursorOptions,
 	final_rel = fetch_upper_rel(root, UPPERREL_FINAL, NULL);
 	if (enable_join_order_plans)
 	{
-		save_join_order_plans(root->glob, final_rel->pathlist);
+		save_join_order_plans(root, final_rel->pathlist);
 	}
 
 	best_path = get_cheapest_fractional_path(final_rel, tuple_fraction);

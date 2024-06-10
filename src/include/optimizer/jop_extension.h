@@ -6,6 +6,8 @@
 #ifndef JOP_EXTENSION_H
 #define JOP_EXTENSION_H
 
+extern char *catch_join_order(PlannerInfo *root, Path *path);
+
 extern void save_join_order_plans(PlannerInfo *root, List *pathlis);
 
 typedef struct string_builder{

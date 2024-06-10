@@ -451,11 +451,8 @@ add_path(RelOptInfo *parent_rel, Path *new_path)
 		/*
 		 * Do a fuzzy cost comparison with standard fuzziness limit.
 		 */
-		if (enable_join_order_plans)
-			if (save_join_order_plan_finished)
+		if (enable_join_order_plans && save_join_order_plan_finished)
 				costcmp = COSTS_DIFFERENT;
-			else	
-				costcmp = compare_path_costs_fuzzily(new_path, old_path, 1);
 		else
 			costcmp = compare_path_costs_fuzzily(new_path, old_path,
 											 STD_FUZZ_FACTOR);
