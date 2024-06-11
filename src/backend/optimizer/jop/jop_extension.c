@@ -1,5 +1,6 @@
 #include "optimizer/jop_extension.h"
 #include "parser/parsetree.h"
+#include "nodes/nodes.h"
 
 void string_builder_init(string_builder* self) {
 	self->data = (char*)palloc(10);
@@ -63,9 +64,9 @@ char* catch_join_order(PlannerInfo *root, Path *path)
 			inner = catch_join_order(root, ((HashPath* )path)->jpath.innerjoinpath);
 			outer = catch_join_order(root, ((HashPath* )path)->jpath.outerjoinpath);
             string_builder_append(&strb, "(");
-            string_builder_append(&strb, inner);
-            string_builder_append(&strb, " ");
             string_builder_append(&strb, outer);
+            string_builder_append(&strb, " ");
+            string_builder_append(&strb, inner);
             string_builder_append(&strb, ")");
             pfree(inner);
             pfree(outer);
@@ -74,9 +75,9 @@ char* catch_join_order(PlannerInfo *root, Path *path)
 			inner = catch_join_order(root, ((MergePath* )path)->jpath.innerjoinpath);
 			outer = catch_join_order(root, ((MergePath* )path)->jpath.outerjoinpath);
             string_builder_append(&strb, "(");
-            string_builder_append(&strb, inner);
-            string_builder_append(&strb, " ");
             string_builder_append(&strb, outer);
+            string_builder_append(&strb, " ");
+            string_builder_append(&strb, inner);
             string_builder_append(&strb, ")");
             pfree(inner);
             pfree(outer);
@@ -85,9 +86,9 @@ char* catch_join_order(PlannerInfo *root, Path *path)
 			inner = catch_join_order(root, ((NestPath* )path)->jpath.innerjoinpath);
 			outer = catch_join_order(root, ((NestPath* )path)->jpath.outerjoinpath);
             string_builder_append(&strb, "(");
-            string_builder_append(&strb, inner);
-            string_builder_append(&strb, " ");
             string_builder_append(&strb, outer);
+            string_builder_append(&strb, " ");
+            string_builder_append(&strb, inner);
             string_builder_append(&strb, ")");
             pfree(inner);
             pfree(outer);            
@@ -132,6 +133,14 @@ char* catch_join_order(PlannerInfo *root, Path *path)
             string_builder_append(&strb, outer);
             pfree(outer);           
 			break;
+		case T_Result:
+			if (IsA(path, ProjectionPath))
+			{
+				outer = catch_join_order(root, ((ProjectionPath* )path)->subpath);
+				string_builder_append(&strb, outer);
+				pfree(outer);
+				break;
+			}
 		case T_SampleScan:
 		case T_TidScan:
 		case T_SubqueryScan:
@@ -145,7 +154,6 @@ char* catch_join_order(PlannerInfo *root, Path *path)
 		case T_CustomScan:
 		case T_Append:
 		case T_MergeAppend:
-		case T_Result:
 		case T_ProjectSet:
 		case T_Unique:
 		case T_Group:
@@ -157,7 +165,7 @@ char* catch_join_order(PlannerInfo *root, Path *path)
 				 (int) path->type);
 			break;
 		default:
-			elog(ERROR, "lcm unrecognized node type: %d",
+			elog(ERROR, "unrecognized node type: %d",
 				 (int) path->type);
 			break;
 	}
