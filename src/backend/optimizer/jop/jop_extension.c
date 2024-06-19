@@ -34,29 +34,38 @@ void string_builder_append(string_builder* self, const char* append) {
 char* catch_join_order(PlannerInfo *root, Path *path)
 {
     string_builder strb;
+	char* alias_name;
+	char* inner;
+	char* outer;
+	char* return_str;
+	Index seqscan_idx;
+	Index indexscan_idx;
+	Index idxonlyscan_idx;
+	Index bit_heapscan_idx;
+	
 	string_builder_init(&strb);
-	char *alias_name = "";
-	char *inner = "";
-	char *outer = "";
+	alias_name = "";
+	inner = "";
+	outer = "";
     switch (path->pathtype)
 	{
 		case T_SeqScan:
-			Index seqscan_idx = path->parent->relid;
+			seqscan_idx = path->parent->relid;
 			alias_name = rt_fetch(seqscan_idx, root->parse->rtable)->eref->aliasname;
             string_builder_append(&strb, alias_name);
             break;
 		case T_IndexScan:
-			Index indexscan_idx = ((IndexPath *)path)->path.parent->relid;
+			indexscan_idx = ((IndexPath *)path)->path.parent->relid;
             alias_name = rt_fetch(indexscan_idx, root->parse->rtable)->eref->aliasname;
             string_builder_append(&strb, alias_name);
 			break;
 		case T_IndexOnlyScan:
-			Index idxonlyscan_idx = ((IndexPath *)path)->path.parent->relid;
+			idxonlyscan_idx = ((IndexPath *)path)->path.parent->relid;
             alias_name = rt_fetch(idxonlyscan_idx, root->parse->rtable)->eref->aliasname;
             string_builder_append(&strb, alias_name);
 			break;
 		case T_BitmapHeapScan:
-			Index bit_heapscan_idx = ((BitmapHeapPath *)path)->path.parent->relid;
+			bit_heapscan_idx = ((BitmapHeapPath *)path)->path.parent->relid;
             alias_name = rt_fetch(bit_heapscan_idx, root->parse->rtable)->eref->aliasname;
             string_builder_append(&strb, alias_name);
 			break;
@@ -169,7 +178,7 @@ char* catch_join_order(PlannerInfo *root, Path *path)
 				 (int) path->type);
 			break;
 	}
-    char *return_str = (char*) palloc(strb.len+1);
+    return_str = (char*) palloc(strb.len+1);
 	memcpy(return_str, strb.data, strb.len);
 	return_str[strb.len] = '\0';
 	string_builder_destroy(&strb);
