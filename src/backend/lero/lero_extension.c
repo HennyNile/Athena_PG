@@ -11,6 +11,7 @@ int lero_subquery_table_num = 2;
 bool record_original_card_phase;
 int join_card_num;
 int cur_card_idx;
+int max_num_tables;
 
 double original_card_list[CARD_MAX_NUM];
 double lero_card_list[CARD_MAX_NUM];
@@ -164,8 +165,11 @@ void lero_pgsysml_set_joinrel_size_estimates(PlannerInfo *root, RelOptInfo *rel,
 			add_join_input_tables(root, outer_rel->cheapest_total_path, &num_tables);
 			add_join_input_tables(root, inner_rel->cheapest_total_path, &num_tables);
 			join_input_table_nums[join_card_num] = num_tables;
+			if (num_tables > max_num_tables) {
+				max_num_tables = num_tables;
+			}
 
-			// elog(WARNING, "estimate card %d: rows %f, num_table %d", join_card_num, rows, num_tables);
+			// elog(WARNING, "estimate card %d: rows %f, num_tables %d", join_card_num, rows, num_tables);
 			join_card_num += 1;
 		}
 	}
@@ -182,6 +186,8 @@ void lero_pgsysml_set_joinrel_size_estimates(PlannerInfo *root, RelOptInfo *rel,
 	rel->rows = rows;
 }
 
+static double swing_factors[4] = {0.1, 100., 10., 0.01};
+
 PlannedStmt *lero_pgsysml_hook_planner(Query *parse, const char *queryString,
 									  int cursorOptions,
 									  ParamListInfo boundParams)
@@ -191,18 +197,23 @@ PlannedStmt *lero_pgsysml_hook_planner(Query *parse, const char *queryString,
 	record_original_card_phase = true;
 	join_card_num = 0;
 	cur_card_idx = 0;
+	max_num_tables = 0;
     original_plan = standard_planner(copyObject(parse), queryString, cursorOptions, boundParams);
-	pfree(original_plan);
 	record_original_card_phase = false;
-	for (int i = 0; i < join_card_num; i++) {
-		if (join_input_table_nums[i] == lero_subquery_table_num) {
-			// elog(WARNING, "change card %d: from %f to %f", i, original_card_list[i], original_card_list[i] * lero_swing_factor);
-			lero_card_list[i] = original_card_list[i] * lero_swing_factor;
-		} else {
-			lero_card_list[i] = original_card_list[i];
+	for (int current_subquery_table_num = max_num_tables; current_subquery_table_num >= 2; --current_subquery_table_num) {
+		for (int current_swing_factor_idx = 0; current_swing_factor_idx < 4; ++current_swing_factor_idx) {
+			for (int i = 0; i < join_card_num; i++) {
+				if (join_input_table_nums[i] == current_subquery_table_num) {
+					// elog(WARNING, "change card %d: from %f to %f", i, original_card_list[i], original_card_list[i] * lero_swing_factor);
+					lero_card_list[i] = original_card_list[i] * swing_factors[current_swing_factor_idx];
+				} else {
+					lero_card_list[i] = original_card_list[i];
+				}
+			}
+
+			plan = standard_planner(copyObject(parse), queryString, cursorOptions, boundParams);
+			pfree(plan);
 		}
 	}
-
-	plan = standard_planner(parse, queryString, cursorOptions, boundParams);
-	return plan;
+	return original_plan;
 }
