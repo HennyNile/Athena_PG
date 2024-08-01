@@ -1,9 +1,11 @@
 #include "lero/lero_extension.h"
+#include "optimizer/cost.h"
 #include "optimizer/planner.h"
 #include "utils/lsyscache.h"
 
 #define CARD_MAX_NUM 25000
 
+bool enable_bao = false;
 bool enable_lero = false;
 double lero_swing_factor = 0.1;
 int lero_subquery_table_num = 2;
@@ -215,5 +217,216 @@ PlannedStmt *lero_pgsysml_hook_planner(Query *parse, const char *queryString,
 			pfree(plan);
 		}
 	}
+	return original_plan;
+}
+
+#define SET2(x1, x2)     \
+do {                    \
+	enable_##x1 = true; \
+	enable_##x2 = true; \
+} while(0)
+
+#define SET3(x1, x2, x3) \
+do {                     \
+	enable_##x1 = true;  \
+	enable_##x2 = true;  \
+	enable_##x3 = true;  \
+} while(0)
+
+#define SET4(x1, x2, x3, x4) \
+do {                         \
+	enable_##x1 = true;      \
+	enable_##x2 = true;      \
+	enable_##x3 = true;      \
+	enable_##x4 = true;      \
+} while(0)
+
+#define SET5(x1, x2, x3, x4, x5) \
+do {                             \
+	enable_##x1 = true;          \
+	enable_##x2 = true;          \
+	enable_##x3 = true;          \
+	enable_##x4 = true;          \
+	enable_##x5 = true;          \
+} while(0)
+
+PlannedStmt *bao_pgsysml_hook_planner(Query *parse, const char *queryString,
+									  int cursorOptions,
+									  ParamListInfo boundParams)
+{
+	PlannedStmt *original_plan;
+    PlannedStmt *plan;
+	bool hj, mj,nl, is, ss, io;
+	int arm;
+    original_plan = standard_planner(copyObject(parse), queryString, cursorOptions, boundParams);
+	hj = enable_hashjoin;
+	mj = enable_mergejoin;
+	nl = enable_nestloop;
+	is = enable_indexscan;
+	ss = enable_seqscan;
+	io = enable_indexonlyscan;
+	for (arm = 0; arm < 48; ++arm) {
+		enable_hashjoin = false;
+		enable_mergejoin = false;
+		enable_nestloop = false;
+		enable_indexscan = false;
+		enable_seqscan = false;
+		enable_indexonlyscan = false;
+		switch (arm) {
+		case 0:
+			SET2(hashjoin, indexonlyscan);
+			break;
+		case 1:
+			SET3(hashjoin, indexonlyscan, indexscan);
+			break;
+		case 2:
+			SET4(hashjoin, indexonlyscan, indexscan, mergejoin);
+			break;
+		case 3:
+			SET5(hashjoin, indexonlyscan, indexscan, mergejoin, nestloop);
+			break;
+		case 4:
+			SET5(hashjoin, indexonlyscan, indexscan, mergejoin, seqscan);
+			break;
+		case 5:
+			SET4(hashjoin, indexonlyscan, indexscan, nestloop);
+			break;
+		case 6:
+			SET5(hashjoin, indexonlyscan, indexscan, nestloop, seqscan);
+			break;
+		case 7:
+			SET4(hashjoin, indexonlyscan, indexscan, seqscan);
+			break;
+		case 8:
+			SET3(hashjoin, indexonlyscan, mergejoin);
+			break;
+		case 9:
+			SET4(hashjoin, indexonlyscan, mergejoin, nestloop);
+			break;
+		case 10:
+			SET5(hashjoin, indexonlyscan, mergejoin, nestloop, seqscan);
+			break;
+		case 11:
+			SET4(hashjoin, indexonlyscan, mergejoin, seqscan);
+			break;
+		case 12:
+			SET3(hashjoin, indexonlyscan, nestloop);
+			break;
+		case 13:
+			SET4(hashjoin, indexonlyscan, nestloop, seqscan);
+			break;
+		case 14:
+			SET3(hashjoin, indexonlyscan, seqscan);
+			break;
+		case 15:
+			SET2(hashjoin, indexscan);
+			break;
+		case 16:
+			SET3(hashjoin, indexscan, mergejoin);
+			break;
+		case 17:
+			SET4(hashjoin, indexscan, mergejoin, nestloop);
+			break;
+		case 18:
+			SET5(hashjoin, indexscan, mergejoin, nestloop, seqscan);
+			break;
+		case 19:
+			SET4(hashjoin, indexscan, mergejoin, seqscan);
+			break;
+		case 20:
+			SET3(hashjoin, indexscan, nestloop);
+			break;
+		case 21:
+			SET4(hashjoin, indexscan, nestloop, seqscan);
+			break;
+		case 22:
+			SET3(hashjoin, indexscan, seqscan);
+			break;
+		case 23:
+			SET4(hashjoin, mergejoin, nestloop, seqscan);
+			break;
+		case 24:
+			SET3(hashjoin, mergejoin, seqscan);
+			break;
+		case 25:
+			SET3(hashjoin, nestloop, seqscan);
+			break;
+		case 26:
+			SET2(hashjoin, seqscan);
+			break;
+		case 27:
+			SET3(indexonlyscan, indexscan, mergejoin);
+			break;
+		case 28:
+			SET4(indexonlyscan, indexscan, mergejoin, nestloop);
+			break;
+		case 29:
+			SET5(indexonlyscan, indexscan, mergejoin, nestloop, seqscan);
+			break;
+		case 30:
+			SET4(indexonlyscan, indexscan, mergejoin, seqscan);
+			break;
+		case 31:
+			SET3(indexonlyscan, indexscan, nestloop);
+			break;
+		case 32:
+			SET4(indexonlyscan, indexscan, nestloop, seqscan);
+			break;
+		case 33:
+			SET2(indexonlyscan, mergejoin);
+			break;
+		case 34:
+			SET3(indexonlyscan, mergejoin, nestloop);
+			break;
+		case 35:
+			SET4(indexonlyscan, mergejoin, nestloop, seqscan);
+			break;
+		case 36:
+			SET3(indexonlyscan, mergejoin, seqscan);
+			break;
+		case 37:
+			SET2(indexonlyscan, nestloop);
+			break;
+		case 38:
+			SET3(indexonlyscan, nestloop, seqscan);
+			break;
+		case 39:
+			SET2(indexscan, mergejoin);
+			break;
+		case 40:
+			SET3(indexscan, mergejoin, nestloop);
+			break;
+		case 41:
+			SET4(indexscan, mergejoin, nestloop, seqscan);
+			break;
+		case 42:
+			SET3(indexscan, mergejoin, seqscan);
+			break;
+		case 43:
+			SET2(indexscan, nestloop);
+			break;
+		case 44:
+			SET3(indexscan, nestloop, seqscan);
+			break;
+		case 45:
+			SET3(mergejoin, nestloop, seqscan);
+			break;
+		case 46:
+			SET2(mergejoin, seqscan);
+			break;
+		case 47:
+			SET2(nestloop, seqscan);
+			break;
+		}
+
+		plan = standard_planner(copyObject(parse), queryString, cursorOptions, boundParams);
+		pfree(plan);
+	}
+	enable_hashjoin = hj;
+	enable_mergejoin = mj;
+	enable_nestloop = nl;
+	enable_seqscan = ss;
+	enable_indexscan = is;
+	enable_indexonlyscan = io;
 	return original_plan;
 }

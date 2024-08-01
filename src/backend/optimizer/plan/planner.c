@@ -277,7 +277,9 @@ planner(Query *parse, const char *query_string, int cursorOptions,
 {
 	PlannedStmt *result;
 
-	if (enable_lero)
+	if (enable_bao) {
+		result = bao_pgsysml_hook_planner(parse, query_string, cursorOptions, boundParams);
+	} else if (enable_lero)
 		result = lero_pgsysml_hook_planner(parse, query_string, cursorOptions, boundParams);
 	else if (planner_hook)
 		result = (*planner_hook) (parse, query_string, cursorOptions, boundParams);

@@ -1999,6 +1999,16 @@ struct config_bool ConfigureNamesBool[] =
 	},
 
 	{
+		{"enable_bao", PGC_USERSET, UNGROUPED,
+			gettext_noop("Enable Bao."),
+			NULL
+		},
+		&enable_bao,
+		false,
+		NULL, NULL, NULL
+    },
+
+	{
 		{"enable_lero", PGC_USERSET, UNGROUPED,
 			gettext_noop("Enable Lero."),
 			NULL
