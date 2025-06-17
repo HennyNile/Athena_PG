@@ -190,7 +190,7 @@ void save_join_order_plans(PlannerInfo *root, List *pathlis)
 {
     ListCell *lc;
     FILE *fp;
-	fp = fopen("/tmp/JOP_join_order_plans.txt", "w");
+	fp = fopen("/tmp/Athena_join_order_plans.txt", "w");
     foreach(lc, pathlis)
     {
         Path *path = (Path *) lfirst(lc);
