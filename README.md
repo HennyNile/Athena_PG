@@ -57,7 +57,13 @@ cd pg_hint_plan-REL16_1_6_1/
 make install
 ```
 
-### 4. Load pg_prewarm and pg_hint_plan
+### 4. Modify configurations
+```
+# postgresql.conf
+shared_preload_libraries = 'pg_prewarm, pg_hint_plan'
+```
+
+### 5. Load pg_prewarm and pg_hint_plan
 ```bash
 # connect to postgres
 psql postgres
